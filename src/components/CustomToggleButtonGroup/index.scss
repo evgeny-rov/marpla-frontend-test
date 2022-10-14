@@ -1,0 +1,26 @@
+.controls {
+  background: #f9f9f9;
+
+  &__inner {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    padding: 20px 0;
+  }
+
+  &__action-button {
+    display: flex;
+  }
+
+  @media (max-width: 768px) {
+    &__inner {
+      flex-direction: column;
+    }
+
+    &__action-button {
+      button {
+        flex: 1 1 auto;
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+.campaign-list {
+  background: #f9f9f9;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 0;
+  }
+
+  &__filters {
+    display: flex;
+    gap: 20px;
+  }
+
+  &__group,
+  &__filter {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  &__table {
+    position: relative;
+    min-height: 590px;
+
+    &-sorted {
+      & > div {
+        min-height: 590px;
+      }
+    }
+
+    .MuiDataGrid-main {
+      div:nth-child(3) {
+        display: none;
+      }
+    }
+  }
+}
