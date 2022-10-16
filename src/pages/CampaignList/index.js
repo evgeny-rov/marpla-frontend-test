@@ -1,22 +1,17 @@
 import './index.scss';
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { useGetListQuery } from '../../redux/api/campaigns';
 import { Backdrop, CircularProgress, ToggleButton } from '@mui/material';
 
 import { CustomizedToggleButtonGroup, DataTable, Search } from '../../components';
 
 import { SortedArticleTable, SortedSubjTable, SortedAdvertsTable } from './components';
-import { getStatusNameById, getTypeNameById } from './helpers';
-
-const statusIdToStatusTypeTable = {
-  7: 'archived',
-  11: 'paused',
-  9: 'active',
-};
+import { getStatusNameById, getTypeNameById, statusIdToStatusTypeTable } from './helpers';
 
 export const CampaignList = () => {
   const { data: campaignList, isLoading: isCampaignListLoading } = useGetListQuery();
-
+  const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearchTerm = useDeferredValue(searchTerm);
   const [sort, setSortBy] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -44,6 +39,14 @@ export const CampaignList = () => {
       { all: [], archived: [], paused: [], active: [] }
     );
   }, [campaignList]);
+
+  const shownCampaigns = useMemo(() => {
+    return campaignsByStatus[statusFilter].filter((campaign) => {
+      const searchValue = deferredSearchTerm.toLowerCase().trim();
+
+      return campaign.CampaignName.toLowerCase().trim().includes(searchValue);
+    });
+  }, [campaignsByStatus, statusFilter, deferredSearchTerm]);
 
   return (
     <div className="campaign-list">
@@ -94,14 +97,14 @@ export const CampaignList = () => {
             </div>
           </div>
 
-          <Search />
+          <Search value={searchTerm} onChange={(ev) => setSearchTerm(ev.target.value)} />
 
           <div className="campaign-list__table">
             <div className="campaign-list__table-sorted">
-              {sort === 'article' && <SortedArticleTable rows={campaignsByStatus[statusFilter]} />}
-              {sort === 'subj' && <SortedSubjTable rows={campaignsByStatus[statusFilter]} />}
-              {sort === 'adverts' && <SortedAdvertsTable rows={campaignsByStatus[statusFilter]} />}
-              {!sort && <DataTable rows={campaignsByStatus[statusFilter]} />}
+              {sort === 'article' && <SortedArticleTable rows={shownCampaigns} />}
+              {sort === 'subj' && <SortedSubjTable rows={shownCampaigns} />}
+              {sort === 'adverts' && <SortedAdvertsTable rows={shownCampaigns} />}
+              {!sort && <DataTable rows={shownCampaigns} />}
             </div>
             <Backdrop
               sx={{

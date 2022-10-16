@@ -1,9 +1,9 @@
-import { TextField } from "@mui/material";
+import { TextField } from '@mui/material';
 
-export const Search = () => {
+export const Search = ({ value, onChange }) => {
   return (
     <div className="search">
-      <TextField label="Поиск" variant="outlined" />
+      <TextField value={value} onChange={onChange} label="Поиск" variant="outlined" />
     </div>
   );
 };

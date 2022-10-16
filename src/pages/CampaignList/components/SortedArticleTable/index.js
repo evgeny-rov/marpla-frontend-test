@@ -38,7 +38,6 @@ const CustomizedTableContainer = styled(TableContainer)({
 });
 
 const Row = ({ row }) => {
-  console.log(row);
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);

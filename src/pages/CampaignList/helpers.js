@@ -1,17 +1,17 @@
-import { removeArrayDuplicates } from "../../utils";
+import { removeArrayDuplicates } from '../../utils';
 
 export const getTypeNameById = (type) => {
   switch (type) {
     case 4:
-      return "Каталог";
+      return 'Каталог';
     case 5:
-      return "Карточка товара";
+      return 'Карточка товара';
     case 6:
-      return "Поиск";
+      return 'Поиск';
     case 7:
-      return "Рекомендации";
+      return 'Рекомендации';
     case 9:
-      return "Активна";
+      return 'Активна';
     default:
       return type;
   }
@@ -20,18 +20,24 @@ export const getTypeNameById = (type) => {
 export const getStatusNameById = (type) => {
   switch (type) {
     case 4:
-      return "Готова к запуску";
+      return 'Готова к запуску';
     case 7:
-      return "Показы завершены";
+      return 'Показы завершены';
     case 8:
-      return "Отказался";
+      return 'Отказался';
     case 9:
-      return "Активна";
+      return 'Активна';
     case 11:
-      return "Приостановлено";
+      return 'Приостановлено';
     default:
       return type;
   }
+};
+
+export const statusIdToStatusTypeTable = {
+  7: 'archived',
+  11: 'paused',
+  9: 'active',
 };
 
 export const getCampaignsStats = (campaigns) => {
