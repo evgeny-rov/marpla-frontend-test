@@ -1,67 +1,49 @@
-import { useEffect, useState } from "react";
-import "./index.scss";
+import './index.scss';
+import { useMemo, useState } from 'react';
+import { useGetListQuery } from '../../redux/api/campaigns';
+import { Backdrop, CircularProgress, ToggleButton } from '@mui/material';
 
-import { useDispatch, useSelector } from "react-redux";
-import { useGetCountQuery, useGetListQuery } from "../../redux/api/campaigns";
-import { setCount, setList } from "../../redux/slices/Edit/campaign";
+import { CustomizedToggleButtonGroup, DataTable, Search } from '../../components';
 
-import { Backdrop, CircularProgress, ToggleButton } from "@mui/material";
+import { SortedArticleTable, SortedSubjTable, SortedAdvertsTable } from './components';
+import { getStatusNameById, getTypeNameById } from './helpers';
 
-import {
-  CustomizedToggleButtonGroup,
-  DataTable,
-  Search,
-} from "../../components";
-
-import {
-  SortedArticleTable,
-  SortedSubjTable,
-  SortedAdvertsTable,
-} from "./components";
-
-import { getStatusNameById, getTypeNameById } from "./helpers";
+const statusIdToStatusTypeTable = {
+  7: 'archived',
+  11: 'paused',
+  9: 'active',
+};
 
 export const CampaignList = () => {
-  const campaign = useSelector((state) => state.campaign);
-  const dispatch = useDispatch();
+  const { data: campaignList, isLoading: isCampaignListLoading } = useGetListQuery();
 
-  const {
-    data: campaignList,
-    isLoading: isGetCampaignListLoading,
-    isSuccess: isGetCampaignListSuccess,
-  } = useGetListQuery();
+  const [group, setGroupBy] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
 
-  const {
-    data: campaignsCount,
-    isLoading: isGetCampaignsCountLoading,
-    isSuccess: isGetCampaignsCountSuccess,
-  } = useGetCountQuery();
+  const setGroupByHandler = (_, sort) => setGroupBy(sort);
+  const setStatusFilterHandler = (_, status) => status && setStatusFilter(status);
 
-  useEffect(() => {
-    if (!isGetCampaignListSuccess) return;
+  const campaignsByStatus = useMemo(() => {
+    const campaigns = campaignList || [];
 
-    dispatch(
-      setList(
-        campaignList.map((item) => ({
+    return campaigns.reduce(
+      (acc, item) => {
+        const statusType = statusIdToStatusTypeTable[item.statusId];
+
+        const mappedItem = {
           ...item,
           Type: getTypeNameById(item.Type),
           statusId: getStatusNameById(item.statusId),
-        }))
-      )
+        };
+
+        if (statusType) acc[statusType].push(mappedItem);
+
+        acc.all.push(mappedItem);
+        return acc;
+      },
+      { all: [], archived: [], paused: [], active: [] }
     );
-  }, [isGetCampaignListSuccess]);
-
-  useEffect(() => {
-    if (!isGetCampaignsCountSuccess) return;
-
-    dispatch(setCount(campaignsCount));
-  }, [isGetCampaignsCountSuccess]);
-
-  const [sort, setSort] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("total");
-
-  const setSortHandler = (_, sort) => setSort(sort);
-  const setStatusFilterHandler = (_, status) => setStatusFilter(status);
+  }, [campaignList]);
 
   return (
     <div className="campaign-list">
@@ -75,9 +57,9 @@ export const CampaignList = () => {
                 <CustomizedToggleButtonGroup
                   className="campaign-list__toggle-group"
                   color="primary"
-                  value={sort}
+                  value={group}
                   exclusive
-                  onChange={setSortHandler}
+                  onChange={setGroupByHandler}
                 >
                   <ToggleButton value="subj">Предмету</ToggleButton>
                   <ToggleButton value="article">Артикулу</ToggleButton>
@@ -97,17 +79,15 @@ export const CampaignList = () => {
                   exclusive
                   onChange={setStatusFilterHandler}
                 >
-                  <ToggleButton value="total">
-                    Все ({campaign.count.total})
-                  </ToggleButton>
+                  <ToggleButton value="all">Все ({campaignsByStatus.all.length})</ToggleButton>
                   <ToggleButton value="active">
-                    Активные ({campaign.count.active})
+                    Активные ({campaignsByStatus.active.length})
                   </ToggleButton>
-                  <ToggleButton value="pause">
-                    Остановленные ({campaign.count.pause})
+                  <ToggleButton value="paused">
+                    Остановленные ({campaignsByStatus.paused.length})
                   </ToggleButton>
-                  <ToggleButton value="archive">
-                    Архив ({campaign.count.archive})
+                  <ToggleButton value="archived">
+                    Архив ({campaignsByStatus.archived.length})
                   </ToggleButton>
                 </CustomizedToggleButtonGroup>
               </div>
@@ -117,28 +97,20 @@ export const CampaignList = () => {
           <Search />
 
           <div className="campaign-list__table">
-            {sort ? (
-              <div className="campaign-list__table-sorted">
-                {sort === "article" && (
-                  <SortedArticleTable rows={campaign.list} />
-                )}
-                {sort === "subj" && <SortedSubjTable rows={campaign.list} />}
-                {sort === "adverts" && (
-                  <SortedAdvertsTable rows={campaign.list} />
-                )}
-              </div>
-            ) : (
-              <DataTable rows={campaign.list} />
-            )}
-
+            <div className="campaign-list__table-sorted">
+              {group === 'article' && <SortedArticleTable rows={campaignList} />}
+              {group === 'subj' && <SortedSubjTable rows={campaignList} />}
+              {group === 'adverts' && <SortedAdvertsTable rows={campaignList} />}
+              <DataTable rows={campaignsByStatus[statusFilter]} />
+            </div>
             <Backdrop
               sx={{
-                position: "absolute",
-                backgroundColor: "#8c8c8c80",
-                color: "#fff",
+                position: 'fixed',
+                backgroundColor: '#8c8c8c80',
+                color: '#fff',
                 zIndex: (theme) => theme.zIndex.drawer + 1,
               }}
-              open={false}
+              open={isCampaignListLoading}
             >
               <CircularProgress color="inherit" />
             </Backdrop>
