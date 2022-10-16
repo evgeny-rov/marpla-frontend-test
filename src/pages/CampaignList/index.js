@@ -17,10 +17,10 @@ const statusIdToStatusTypeTable = {
 export const CampaignList = () => {
   const { data: campaignList, isLoading: isCampaignListLoading } = useGetListQuery();
 
-  const [group, setGroupBy] = useState(false);
+  const [sort, setSortBy] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const setGroupByHandler = (_, sort) => setGroupBy(sort);
+  const setSortHandler = (_, sort) => setSortBy(sort);
   const setStatusFilterHandler = (_, status) => status && setStatusFilter(status);
 
   const campaignsByStatus = useMemo(() => {
@@ -57,9 +57,9 @@ export const CampaignList = () => {
                 <CustomizedToggleButtonGroup
                   className="campaign-list__toggle-group"
                   color="primary"
-                  value={group}
+                  value={sort}
                   exclusive
-                  onChange={setGroupByHandler}
+                  onChange={setSortHandler}
                 >
                   <ToggleButton value="subj">Предмету</ToggleButton>
                   <ToggleButton value="article">Артикулу</ToggleButton>
@@ -98,10 +98,10 @@ export const CampaignList = () => {
 
           <div className="campaign-list__table">
             <div className="campaign-list__table-sorted">
-              {group === 'article' && <SortedArticleTable rows={campaignList} />}
-              {group === 'subj' && <SortedSubjTable rows={campaignList} />}
-              {group === 'adverts' && <SortedAdvertsTable rows={campaignList} />}
-              <DataTable rows={campaignsByStatus[statusFilter]} />
+              {sort === 'article' && <SortedArticleTable rows={campaignsByStatus[statusFilter]} />}
+              {sort === 'subj' && <SortedSubjTable rows={campaignsByStatus[statusFilter]} />}
+              {sort === 'adverts' && <SortedAdvertsTable rows={campaignsByStatus[statusFilter]} />}
+              {!sort && <DataTable rows={campaignsByStatus[statusFilter]} />}
             </div>
             <Backdrop
               sx={{

@@ -1,20 +1,20 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-import { BASE_API_URL } from "../../const";
+import { BASE_API_URL } from '../../const';
 
-import { getQueryParams } from "../../utils";
+import { getQueryParams } from '../../utils';
 
 export const articlesApi = createApi({
-  reducerPath: "articlesApi",
+  reducerPath: 'articlesApi',
   baseQuery: fetchBaseQuery({ baseUrl: `${BASE_API_URL}/mocks/` }),
   endpoints: (builder) => ({
-    getSubjName: builder.mutation({
+    getSubjName: builder.query({
       query: () => ({
-        url: "subjName",
+        url: 'subjName',
         params: getQueryParams(),
       }),
     }),
   }),
 });
 
-export const { useGetSubjNameMutation } = articlesApi;
+export const { useGetSubjNameQuery } = articlesApi;

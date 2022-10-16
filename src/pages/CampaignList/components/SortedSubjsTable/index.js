@@ -1,8 +1,10 @@
-import { Fragment, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Fragment, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import {
+  Backdrop,
   Box,
+  CircularProgress,
   Collapse,
   IconButton,
   Paper,
@@ -13,12 +15,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from "@mui/material";
+} from '@mui/material';
 
 import {
   KeyboardArrowDown as KeyboardArrowDownIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
-} from "@mui/icons-material";
+} from '@mui/icons-material';
 
 import {
   getStatusNameById,
@@ -26,7 +28,7 @@ import {
   filteredArticlesBySubjName,
   getArticleSubjName,
   getCampaignsStats,
-} from "../../helpers";
+} from '../../helpers';
 
 import {
   formatPrice,
@@ -34,16 +36,16 @@ import {
   removeArrayDuplicates,
   removeArrayUndefined,
   roundNumber,
-} from "../../../../utils";
+} from '../../../../utils';
 
-import { useGetSubjNameMutation } from "../../../../redux/api/articles";
+import { useGetSubjNameQuery } from '../../../../redux/api/articles';
 
 const CustomizedTableContainer = styled(TableContainer)({
-  ".MuiTable-root th, .MuiTable-root td": {
-    border: "1px solid #e0e0e0",
+  '.MuiTable-root th, .MuiTable-root td': {
+    border: '1px solid #e0e0e0',
   },
-  "thead.MuiTableHead-root": {
-    background: "#9cbfcb",
+  'thead.MuiTableHead-root': {
+    background: '#9cbfcb',
   },
 });
 
@@ -53,7 +55,7 @@ const Row = ({ row }) => {
   const [open, setOpen] = useState(false);
   return (
     <Fragment>
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
+      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell>
           <IconButton onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
@@ -69,16 +71,10 @@ const Row = ({ row }) => {
         <TableCell align="right">{formatPrice(row.stats.Views)}</TableCell>
         <TableCell align="right">{formatPrice(row.stats.Clicks)}</TableCell>
         <TableCell align="right">{roundNumber(row.stats.Ctr, 2)}</TableCell>
-        <TableCell align="right">
-          {formatPrice(Math.ceil(row.stats.Cpc))}
-        </TableCell>
-        <TableCell align="right">
-          {formatPrice(Math.ceil(row.stats.spent))}
-        </TableCell>
+        <TableCell align="right">{formatPrice(Math.ceil(row.stats.Cpc))}</TableCell>
+        <TableCell align="right">{formatPrice(Math.ceil(row.stats.spent))}</TableCell>
         <TableCell align="right">{formatPrice(row.stats.orders)}</TableCell>
-        <TableCell align="right">
-          {formatPrice(Math.ceil(row.stats.target))}
-        </TableCell>
+        <TableCell align="right">{formatPrice(Math.ceil(row.stats.target))}</TableCell>
       </TableRow>
 
       <TableRow>
@@ -105,10 +101,7 @@ const Row = ({ row }) => {
 
                 <TableBody>
                   {row.campaigns.map((row, index) => (
-                    <TableRow
-                      key={index}
-                      onClick={() => navigate(`/edit/${row.Id}`)}
-                    >
+                    <TableRow key={index} onClick={() => navigate(`/edit/${row.Id}`)}>
                       <TableCell component="th" scope="row">
                         {row.nms.length}
                       </TableCell>
@@ -116,42 +109,28 @@ const Row = ({ row }) => {
                       <TableCell>{getTypeNameById(row.Type)}</TableCell>
                       <TableCell>{row.CampaignName}</TableCell>
                       <TableCell>
-                        {!isUndefined(row.Cpm)
-                          ? formatPrice(Math.ceil(row.Cpm))
-                          : "-"}
+                        {!isUndefined(row.Cpm) ? formatPrice(Math.ceil(row.Cpm)) : '-'}
                       </TableCell>
                       <TableCell>
-                        {!isUndefined(row.Views) ? formatPrice(row.Views) : "-"}
+                        {!isUndefined(row.Views) ? formatPrice(row.Views) : '-'}
                       </TableCell>
                       <TableCell>
-                        {!isUndefined(row.Clicks)
-                          ? formatPrice(row.Clicks)
-                          : "-"}
+                        {!isUndefined(row.Clicks) ? formatPrice(row.Clicks) : '-'}
                       </TableCell>
                       <TableCell>
-                        {!isUndefined(row.Ctr)
-                          ? formatPrice(roundNumber(row.Ctr, 2))
-                          : "-"}
+                        {!isUndefined(row.Ctr) ? formatPrice(roundNumber(row.Ctr, 2)) : '-'}
                       </TableCell>
                       <TableCell>
-                        {!isUndefined(row.Cpc)
-                          ? formatPrice(Math.ceil(row.Cpc))
-                          : "-"}
+                        {!isUndefined(row.Cpc) ? formatPrice(Math.ceil(row.Cpc)) : '-'}
                       </TableCell>
                       <TableCell>
-                        {!isUndefined(row.spent)
-                          ? formatPrice(Math.ceil(row.spent))
-                          : "-"}
+                        {!isUndefined(row.spent) ? formatPrice(Math.ceil(row.spent)) : '-'}
                       </TableCell>
                       <TableCell>
-                        {!isUndefined(row.orders)
-                          ? formatPrice(row.orders)
-                          : "-"}
+                        {!isUndefined(row.orders) ? formatPrice(row.orders) : '-'}
                       </TableCell>
                       <TableCell>
-                        {!isUndefined(row.target)
-                          ? formatPrice(Math.ceil(row.target))
-                          : "-"}
+                        {!isUndefined(row.target) ? formatPrice(Math.ceil(row.target)) : '-'}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -166,35 +145,30 @@ const Row = ({ row }) => {
 };
 
 export const SortedSubjTable = ({ rows }) => {
-  const [
-    getSubjName,
-    {
-      data: subjNameData,
-      isLoading: isGetSubjNameLoading,
-      isSuccess: isGetSubjNameSuccess,
-    },
-  ] = useGetSubjNameMutation();
+  const { data: subjNameData, isLoading: isGetSubjNameLoading } = useGetSubjNameQuery();
 
-  const [campaigns, setCampaigns] = useState([]);
+  if (isGetSubjNameLoading)
+    return (
+      <Backdrop
+        sx={{
+          position: 'fixed',
+          backgroundColor: '#8c8c8c80',
+          color: '#fff',
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+        open={true}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+    );
 
-  useEffect(() => {
-    const articles = removeArrayDuplicates(rows.map(({ nms }) => nms).flat(1));
-
-    getSubjName({ articles });
-  }, [rows]);
-
-  useEffect(() => {
-    if (!isGetSubjNameSuccess) return;
-
-    const campaignsSortedBySubjName = filteredArticlesBySubjName(
-      subjNameData
-    ).map((subjName) => {
+  const campaignsSortedBySubjName = filteredArticlesBySubjName(subjNameData)
+    .map((subjName) => {
       const campaigns = removeArrayUndefined(
         rows.map((campaign) => {
           const isArticleExists =
             campaign.nms.findIndex(
-              (_article) =>
-                getArticleSubjName(_article, subjNameData) === subjName
+              (_article) => getArticleSubjName(_article, subjNameData) === subjName
             ) !== -1;
 
           if (isArticleExists) {
@@ -206,27 +180,18 @@ export const SortedSubjTable = ({ rows }) => {
       return {
         subjName: subjName,
         campaigns,
-        subjsCount: removeArrayDuplicates(
-          campaigns.map((campaign) => campaign.nms).flat(1)
-        ).length,
+        subjsCount: removeArrayDuplicates(campaigns.map((campaign) => campaign.nms).flat(1)).length,
       };
-    });
+    })
+    .filter(({ campaigns }) => campaigns.length > 0);
 
-    const campaignsSortedBySubjNameWithStats = campaignsSortedBySubjName.map(
-      (sortedCampaign) => ({
-        ...sortedCampaign,
-        stats: getCampaignsStats(sortedCampaign.campaigns),
-      })
-    );
-
-    setCampaigns(campaignsSortedBySubjNameWithStats);
-  }, [isGetSubjNameSuccess]);
+  const campaignsSortedBySubjNameWithStats = campaignsSortedBySubjName.map((sortedCampaign) => ({
+    ...sortedCampaign,
+    stats: getCampaignsStats(sortedCampaign.campaigns),
+  }));
 
   return (
-    <CustomizedTableContainer
-      className="campaign-list__table-sorted-by-subj"
-      component={Paper}
-    >
+    <CustomizedTableContainer className="campaign-list__table-sorted-by-subj" component={Paper}>
       <Table size="small">
         <TableHead>
           <TableRow>
@@ -244,8 +209,9 @@ export const SortedSubjTable = ({ rows }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {campaigns &&
-            campaigns.map((row, index) => <Row key={index} row={row} />)}
+          {campaignsSortedBySubjNameWithStats.map((row, index) => (
+            <Row key={index} row={row} />
+          ))}
         </TableBody>
       </Table>
     </CustomizedTableContainer>
